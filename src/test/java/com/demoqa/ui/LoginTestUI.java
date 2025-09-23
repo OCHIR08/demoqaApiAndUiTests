@@ -3,9 +3,6 @@ package com.demoqa.ui;
 import com.codeborne.selenide.Configuration;
 import com.demoqa.config.Config;
 import com.demoqa.ui.steps.LoginSteps;
-import io.qameta.allure.Owner;
-import io.qameta.allure.Severity;
-import io.qameta.allure.SeverityLevel;
 import org.junit.jupiter.api.*;
 
 import static com.codeborne.selenide.Selenide.*;
@@ -22,8 +19,8 @@ public class LoginTestUI {
 
     @Test
     @Tag("ui")
-    @Owner("ermoshkaev")
-    @Severity(SeverityLevel.BLOCKER)
+//    @Owner("ermoshkaev")
+//    @Severity(SeverityLevel.BLOCKER)
     @DisplayName("Проверка успешной авторизации")
     public void successLogin(){
         new LoginSteps()

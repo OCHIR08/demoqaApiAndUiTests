@@ -1,5 +1,12 @@
 plugins {
     id 'java'
+    id 'io.qameta.allure' version '2.11.2'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
 }
 
 group = 'org.example'
@@ -10,30 +17,44 @@ repositories {
 }
 
 dependencies {
-
+    // JUnit 5
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 
-    implementation "com.codeborne:selenide:7.9.4"
+    // Selenide
+    implementation 'com.codeborne:selenide:7.9.4'
+
+    // Rest Assured
+    testImplementation 'io.rest-assured:rest-assured:5.4.0'
 
     // Allure
-    testImplementation 'io.qameta.allure:allure-selenide:2.29.1'
-    testImplementation 'io.qameta.allure:allure-junit5:2.29.1'
-    implementation 'io.qameta.allure:allure-java-commons:2.29.1'
-
-    //lombok
-    compileOnly "org.projectlombok:lombok:1.18.34"
-    annotationProcessor "org.projectlombok:lombok:1.18.34"
-    testCompileOnly "org.projectlombok:lombok:1.18.34"
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.34"
-
-    testImplementation 'io.rest-assured:rest-assured:5.4.0'
-    testImplementation 'io.rest-assured:json-schema-validator:5.4.0'
+    implementation 'io.qameta.allure:allure-selenide:2.27.0'
+    implementation 'io.qameta.allure:allure-junit5:2.27.0'
+    implementation 'io.qameta.allure:allure-java-commons:2.27.0'
 
 
+    // Lombok
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+    testCompileOnly 'org.projectlombok:lombok:1.18.26'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
 
+    implementation 'com.google.code.gson:gson:2.10.1'
 }
 
 test {
     useJUnitPlatform()
+    systemProperty "allure.results.directory", "$buildDir/allure-results"
+}
+
+allure {
+    version = '2.27.0'
+    adapter {
+        autoconfigure = true
+        frameworks {
+            junit5 {
+                enabled = true
+            }
+        }
+    }
 }
