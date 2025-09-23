@@ -1,50 +1,29 @@
 stages:
-  - build
   - test
-  - report
+  - notify
 
-variables:
-  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-  JAVA_HOME: "/usr/lib/jvm/java-17-openjdk"
-
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
-  paths:
-    - .gradle/wrapper
-    - .gradle/caches
-
-before_script:
-  - export PATH="$JAVA_HOME/bin:$PATH"
-  - java -version
-  - ./gradlew --version
-
-build:
-  stage: build
-  script:
-    - ./gradlew clean assemble
-  artifacts:
-    paths:
-      - build/libs
-    expire_in: 1 week
-
-tests:
+run_tests:
   stage: test
+  image: gradle:8.5-jdk17
   script:
-    - ./gradlew clean test
+    - gradle clean test
+    - gradle allureReport
   artifacts:
     when: always
     paths:
       - build/test-results/test
-      - build/allure-results
+      - build/allure-report
     reports:
       junit: build/test-results/test/TEST-*.xml
 
-allure_report:
-  stage: report
-  image: frankescobar/allure-docker-service:latest
+notify_telegram:
+  stage: notify
+  image: openjdk:17
+  dependencies:
+    - run_tests
+  before_script:
+    - apt-get update -y && apt-get install -y zip unzip curl
+    - chmod +x ci/send_telegram.sh
   script:
-    - allure generate build/allure-results --clean -o build/allure-report
-  artifacts:
-    paths:
-      - build/allure-report
-    expire_in: 1 week
+    - ./ci/send_telegram.sh
+  when: always
