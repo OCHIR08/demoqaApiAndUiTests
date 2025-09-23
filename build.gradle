@@ -25,7 +25,7 @@ dependencies {
     implementation 'com.codeborne:selenide:7.9.4'
 
     // Rest Assured
-    testImplementation 'io.rest-assured:rest-assured:5.4.0'
+    implementation 'io.rest-assured:rest-assured:5.4.0'
 
     // Allure
     implementation 'io.qameta.allure:allure-selenide:2.27.0'

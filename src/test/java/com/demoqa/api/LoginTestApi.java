@@ -1,10 +1,10 @@
 package com.demoqa.api;
 
-import static io.restassured.RestAssured.given;
-import static io.restassured.http.ContentType.JSON;
-import static org.hamcrest.Matchers.is;
 
-import com.demoqa.api.models.LoginRequest;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+
+import com.demoqa.api.clients.LoginStepsApi;
 import com.demoqa.config.Config;
 import io.qameta.allure.Owner;
 import io.qameta.allure.Severity;
@@ -15,7 +15,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-public class LoginTestApi  {
+
+public class LoginTestApi {
+
+    private final LoginStepsApi loginSteps = new LoginStepsApi();
 
     @BeforeAll
     public static void setup() {
@@ -28,25 +31,16 @@ public class LoginTestApi  {
     @Severity(SeverityLevel.BLOCKER)
     @DisplayName("Проверка успешной авторизации")
     void successfulLoginTest() {
-        LoginRequest requestBody = new LoginRequest();
-        requestBody.setUserName(Config.loginIvan());
-        requestBody.setPassword(Config.passwordIvan());
+        String username = Config.loginIvan();
+        String password = Config.passwordIvan();
 
-        given()
-                .body(requestBody)
-                .contentType(JSON)
-                .log().uri()
-
-                .when()
-                .post("/Account/v1/Login")
-
+        loginSteps.login(username, password)
                 .then()
                 .log().status()
                 .log().body()
-
                 .statusCode(200)
-                .body("username", is(Config.loginIvan()))
-                .body("password", is(Config.passwordIvan()));
+                .body("username", is(username))
+                .body("token", notNullValue());
     }
 }
 
