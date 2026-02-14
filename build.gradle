@@ -26,6 +26,7 @@ dependencies {
 
     // Rest Assured
     implementation 'io.rest-assured:rest-assured:5.4.0'
+    implementation 'io.rest-assured:json-schema-validator:5.4.0'
 
     // Allure
     implementation 'io.qameta.allure:allure-selenide:2.27.0'

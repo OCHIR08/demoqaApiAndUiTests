@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["userId", "username", "token", "expires", "created_date", "isActive"],
+  "properties": {
+    "userId": { "type": "string", "pattern": "^[a-f0-9-]{36}$" },
+    "username": { "type": "string" },
+    "token": { "type": "string" },
+    "expires": { "type": "string" },
+    "created_date": { "type": "string" },
+    "isActive": { "type": "boolean" }
+  }
+}

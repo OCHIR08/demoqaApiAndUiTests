@@ -1,11 +1,13 @@
 package com.demoqa.api;
 
-
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
+import static org.hamcrest.Matchers.*;
 
 import com.demoqa.api.clients.LoginStepsApi;
+import com.demoqa.api.models.AddBookModel;
+import com.demoqa.api.models.DeletBookModel;
+import com.demoqa.api.models.IsbnModel;
 import com.demoqa.base.BaseApiTest;
 import com.demoqa.config.Config;
 import io.qameta.allure.Owner;
@@ -16,12 +18,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 public class LoginTestApi extends BaseApiTest {
 
     private final LoginStepsApi loginSteps = new LoginStepsApi();
     String username = Config.loginIvan();
     String password = Config.passwordIvan();
-
     @Test
     @Tag("api")
     @Owner("ermoshkaev")
@@ -33,8 +36,10 @@ public class LoginTestApi extends BaseApiTest {
                 .log().status()
                 .log().body()
                 .statusCode(200)
+                .body(matchesJsonSchemaInClasspath("login-schema.json"))
                 .body("username", is(username))
-                .body("token", notNullValue());
+                .header("Content-Type", is("application/json; charset=utf-8"))
+                .time(lessThan(3000L));
     }
 
     @Test
@@ -49,51 +54,54 @@ public class LoginTestApi extends BaseApiTest {
                 .when()
                 .get("/BookStore/v1/Books")
                 .then()
-                .log().all();
+                .body(matchesJsonSchemaInClasspath("books-schema.json"))
+                .statusCode(200)
+                .time(lessThan(1500L))
+                .log().ifValidationFails();
     }
 
     @Test
     @Tag("api")
     @Owner("ermoshkaev")
     @Severity(SeverityLevel.BLOCKER)
-    @DisplayName("Добавленик книг к клиенту")
-    void addBookToUser() {
+    @DisplayName("E2E: Полный цикл управления книгой в профиле")
+    void bookLifecycleTest() {
+        // 1. ПОДГОТОВКА: Удаляем все книги (чтобы тест был независимым)
+        given()
+                .header("Authorization", "Bearer " + authToken)
+                .queryParam("UserId", userId)
+                .when()
+                .delete("/BookStore/v1/Books")
+                .then()
+                .statusCode(204);
+
+        // 2. ДЕЙСТВИЕ: Добавляем книгу через нашу модель
+        AddBookModel requestBody = AddBookModel.builder()
+                .userId(userId)
+                .collectionOfIsbns(List.of(new IsbnModel("9781449331818")))
+                .build();
 
         given()
                 .header("Authorization", "Bearer " + authToken)
                 .contentType(ContentType.JSON)
-                .body("{\n" +
-                        "  \"userId\":" + userId +
-                        "  \"collectionOfIsbns\": [\n" +
-                        "    {\n" +
-                        "      \"isbn\": \"9781449331818\"\n" +
-                        "    }\n" +
-                        "  ]\n" +
-                        "}")
-
+                .body(requestBody)
                 .when()
                 .post("/BookStore/v1/Books")
                 .then()
-                .log().all() // Выведет лог ответа в консоль для отладки
-                .log().status()
-                .log().body()
                 .statusCode(201);
-    }
 
-    @Test
-    @Tag("api")
-    @Owner("ermoshkaev")
-    @Severity(SeverityLevel.BLOCKER)
-    @DisplayName("Проверить наличие книг у клиента")
-    void checkBookClient(){
+        // 3. ПРОВЕРКА: Запрашиваем профиль пользователя и сверяем данные
         given()
                 .header("Authorization", "Bearer " + authToken)
-                .contentType(ContentType.JSON)
                 .when()
-                .get("/Account/v1/User/"+userId)
+                .get("/Account/v1/User/" + userId)
                 .then()
-                .log().all();
+                .statusCode(200)
+                .body("username", is(username))
+                .body("books[0].isbn", is("9781449331818")) // Книга на месте!
+                .body("books", hasSize(1)); // И она там ровно одна
     }
+
 
     @Test
     @Tag("api")
@@ -101,19 +109,44 @@ public class LoginTestApi extends BaseApiTest {
     @Severity(SeverityLevel.BLOCKER)
     @DisplayName("Удаление книги у клиента")
     void deletBookClient(){
+        // ПОДГОТОВКА: 1. ДЕЙСТВИЕ: Добавляем книгу через нашу модель
+        AddBookModel requestBody = AddBookModel.builder()
+                .userId(userId)
+                .collectionOfIsbns(List.of(new IsbnModel("9781449331818")))
+                .build();
+
         given()
-                .header("Authorization", "Bearer" + authToken)
+                .header("Authorization", "Bearer " + authToken)
                 .contentType(ContentType.JSON)
-                .body("{\n" +
-                        "  \"isbn\": \"9781449331818\",\n" +
-                        "  \"userId\":" + userId +
-                        "}")
+                .body(requestBody)
+                .when()
+                .post("/BookStore/v1/Books")
+                .then();
+
+        // 2.  Удаляем  книгу
+        DeletBookModel requestBodyDelete = DeletBookModel.builder()
+                .userId(userId)
+                .isbn("9781449331818")
+                .build();
+
+        given()
+                .header("Authorization", "Bearer " + authToken)
+                .contentType(ContentType.JSON)
+                .body(requestBodyDelete)
                 .when()
                 .delete("/BookStore/v1/Book")
                 .then()
+                .statusCode(204)
                 .log().all();
+
+        // 3. ПРОВЕРКА: Убеждаемся, что в профиле пусто
+        given()
+                .header("Authorization", "Bearer " + authToken)
+                .when()
+                .get("/Account/v1/User/" + userId)
+                .then()
+                .statusCode(200)
+                .body("books", hasSize(0));
     }
-
-
 }
 
