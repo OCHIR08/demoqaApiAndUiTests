@@ -6,21 +6,20 @@ import static org.hamcrest.Matchers.*;
 
 import com.demoqa.api.clients.LoginStepsApi;
 import com.demoqa.api.models.AddBookModel;
-import com.demoqa.api.models.DeletBookModel;
+import com.demoqa.api.models.DeleteBookModel;
 import com.demoqa.api.models.IsbnModel;
 import com.demoqa.base.BaseApiTest;
 import com.demoqa.config.Config;
 import io.qameta.allure.Owner;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
-import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class LoginTestApi extends BaseApiTest {
+public class LoginApiTest extends BaseApiTest {
 
     private final LoginStepsApi loginSteps = new LoginStepsApi();
     String username = Config.loginIvan();
@@ -33,8 +32,6 @@ public class LoginTestApi extends BaseApiTest {
     void successfulLoginTest() {
         loginSteps.login(username, password)
                 .then()
-                .log().status()
-                .log().body()
                 .statusCode(200)
                 .body(matchesJsonSchemaInClasspath("login-schema.json"))
                 .body("username", is(username))
@@ -49,8 +46,7 @@ public class LoginTestApi extends BaseApiTest {
     @DisplayName("Запрос списка книг")
     void getBooks() {
         given()
-                .header("Authorization", "Bearer " + authToken)
-                .contentType(ContentType.JSON)
+                .spec(requestSpec)
                 .when()
                 .get("/BookStore/v1/Books")
                 .then()
@@ -68,7 +64,7 @@ public class LoginTestApi extends BaseApiTest {
     void bookLifecycleTest() {
         // 1. ПОДГОТОВКА: Удаляем все книги (чтобы тест был независимым)
         given()
-                .header("Authorization", "Bearer " + authToken)
+                .spec(requestSpec)
                 .queryParam("UserId", userId)
                 .when()
                 .delete("/BookStore/v1/Books")
@@ -82,8 +78,7 @@ public class LoginTestApi extends BaseApiTest {
                 .build();
 
         given()
-                .header("Authorization", "Bearer " + authToken)
-                .contentType(ContentType.JSON)
+                .spec(requestSpec)
                 .body(requestBody)
                 .when()
                 .post("/BookStore/v1/Books")
@@ -92,7 +87,7 @@ public class LoginTestApi extends BaseApiTest {
 
         // 3. ПРОВЕРКА: Запрашиваем профиль пользователя и сверяем данные
         given()
-                .header("Authorization", "Bearer " + authToken)
+                .spec(requestSpec)
                 .when()
                 .get("/Account/v1/User/" + userId)
                 .then()
@@ -108,7 +103,7 @@ public class LoginTestApi extends BaseApiTest {
     @Owner("ermoshkaev")
     @Severity(SeverityLevel.BLOCKER)
     @DisplayName("Удаление книги у клиента")
-    void deletBookClient(){
+    void deleteBookClient(){
         // ПОДГОТОВКА: 1. ДЕЙСТВИЕ: Добавляем книгу через нашу модель
         AddBookModel requestBody = AddBookModel.builder()
                 .userId(userId)
@@ -116,22 +111,20 @@ public class LoginTestApi extends BaseApiTest {
                 .build();
 
         given()
-                .header("Authorization", "Bearer " + authToken)
-                .contentType(ContentType.JSON)
+                .spec(requestSpec)
                 .body(requestBody)
                 .when()
                 .post("/BookStore/v1/Books")
                 .then();
 
         // 2.  Удаляем  книгу
-        DeletBookModel requestBodyDelete = DeletBookModel.builder()
+        DeleteBookModel requestBodyDelete = DeleteBookModel.builder()
                 .userId(userId)
                 .isbn("9781449331818")
                 .build();
 
         given()
-                .header("Authorization", "Bearer " + authToken)
-                .contentType(ContentType.JSON)
+                .spec(requestSpec)
                 .body(requestBodyDelete)
                 .when()
                 .delete("/BookStore/v1/Book")
