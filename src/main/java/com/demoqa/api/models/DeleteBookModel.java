@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DeletBookModel {
+public class DeleteBookModel {
     private String isbn;
     private String userId;
 }
