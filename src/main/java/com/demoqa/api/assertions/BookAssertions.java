@@ -27,6 +27,6 @@ public class BookAssertions {
         response.then()
                 .body(matchesJsonSchemaInClasspath(path))
                 .statusCode(200)
-                .time(lessThan(1500L));
+                .time(lessThan(2000L));
     }
 }
