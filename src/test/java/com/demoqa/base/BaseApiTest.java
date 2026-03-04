@@ -1,37 +1,66 @@
 package com.demoqa.base;
 
-import com.demoqa.api.services.AccountService;
+import com.demoqa.api.models.request.AccountModel;
+import com.demoqa.api.models.response.GetTokenResponse;
+import com.demoqa.api.models.response.LoginResponse;
+import com.demoqa.api.services.AccountServices;
 import com.demoqa.config.Config;
-import io.restassured.RestAssured;
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 
 public class BaseApiTest {
-    public static String authToken;
-    public static String userId;
-    public static RequestSpecification requestSpec;
+
+    protected String authToken;
+    protected String userId;
+
+    private final AccountServices accountServices = new AccountServices();
 
     @BeforeAll
-    public static void setup() {
-        // Настройка глобального логирования для Allure
-        RestAssured.filters(new io.qameta.allure.restassured.AllureRestAssured());
-        RestAssured.baseURI = Config.baseUrl();
+    public static void setUp() {
+    }
 
-        // Авторизация вынесена в сервис
-        AccountService accountService = new AccountService();
-        Response response = accountService.login(Config.loginIvan(), Config.passwordIvan())
-                .then().statusCode(200).extract().response();
+    @BeforeEach
+    public void setupTest(){
+        this.authToken = null;
+        this.userId = null;
+    }
 
-        authToken = response.path("token");
-        userId = response.path("userId");
-
-        // Сборка спецификации
-        requestSpec = new RequestSpecBuilder()
-                .setContentType(ContentType.JSON)
-                .addHeader("Authorization", "Bearer " + authToken)
+    protected void authenticate(String username, String password) {
+        AccountModel credentials = AccountModel.builder()
+                .userName(username)
+                .password(password)
                 .build();
+
+        // 🔥 Генерируем свежий токен
+        GetTokenResponse tokenResponse = accountServices.getToken(credentials);
+
+        if (!"Success".equals(tokenResponse.getStatus()) || tokenResponse.getToken() == null) {
+            throw new IllegalStateException(
+                    "Failed to generate token: " + tokenResponse.getResult());
+        }
+
+        this.authToken = tokenResponse.getToken();
+
+        // 🔥 Получаем userId через логин (или кэшируем при регистрации)
+        LoginResponse loginResponse = accountServices.login(credentials);
+        this.userId = loginResponse.getUserId();
+    }
+
+    protected void authenticateWithConfig() {
+        authenticate(Config.loginIvan(), Config.passwordIvan());
+    }
+
+    protected String getAuthToken() {
+        if (authToken == null) {
+            authenticateWithConfig();
+        }
+        return authToken;
+    }
+
+    protected String getUserId() {
+        if (userId == null) {
+            authenticateWithConfig();
+        }
+        return userId;
     }
 }
