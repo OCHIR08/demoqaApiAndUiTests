@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Account User Response",
+  "description": "Schema for GET /account/v1/user/{userId} response",
+  "type": "object",
+  "required": ["userId", "username", "books"],
+  "properties": {
+    "userId": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+      "description": "Unique user identifier (UUID)"
+    },
+    "username": {
+      "type": "string",
+      "minLength": 1,
+      "description": "User's username"
+    },
+    "books": {
+      "type": "array",
+      "description": "List of books associated with user",
+      "items": {
+        "type": "object",
+        "required": ["isbn", "title", "author"],
+        "properties": {
+          "isbn": {
+            "type": "string",
+            "description": "ISBN-10 or ISBN-13",
+            "pattern": "^(?:ISBN(?:-1[03])?:? )?(?=[0-9X]{10}$|(?=(?:[0-9]+[- ]){3})[- 0-9X]{13}$|97[89][0-9]{10}$|(?=(?:[0-9]+[- ]){4})[- 0-9]{17}$)(?:97[89][- ]?)?[0-9]{1,5}[- ]?[0-9]+[- ]?[0-9]+[- ]?[0-9X]$"
+          },
+          "title": { "type": "string", "minLength": 1 },
+          "subTitle": { "type": "string" },
+          "author": { "type": "string", "minLength": 1 },
+          "publish_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "publisher": { "type": "string" },
+          "pages": { "type": "integer", "minimum": 0 },
+          "description": { "type": "string" },
+          "website": { "type": "string", "format": "uri" }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

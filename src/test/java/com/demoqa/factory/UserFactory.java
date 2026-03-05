@@ -67,71 +67,18 @@ public class UserFactory {
     }
 
     /**
-     * Создаёт пользователя с заданными username и password
+     *  userId non-existent-uuid
      */
-    public static AccountModel createUser(String username, String password) {
-        return AccountModel.builder()
-                .userName(username)
-                .password(password)
-                .build();
+    public static String nonExistentUuid(){
+        return "yyyyeeee-test-test-test-123456789012";
     }
 
-    /**
-     * Создаёт пользователя с полностью кастомными данными
-     */
-    public static AccountModel createUserCustom(String username, String password, String... extra) {
-        return AccountModel.builder()
-                .userName(username)
-                .password(password)
-                .build();
-    }
+    public static String validUserIdIvan() { return  "9e7631f0-c898-43e6-afe3-f4699118feba"; }
 
     /**
-     * Генерирует уникальный username (с timestamp для избежания коллизий)
+     *  non valid token
      */
-    public static String generateUniqueUsername() {
-        return faker.name().username() + "_" + System.currentTimeMillis();
-    }
-
-    /**
-     * Генерирует валидный пароль по требованиям DemoQA
-     */
-    public static String generateValidPassword() {
-        return ErrorMessages.VALID_PASSWORD;
-    }
-
-    /**
-     * Генерирует невалидный пароль (короче 8 символов)
-     */
-    public static String generateShortPassword() {
-        return "Aa1!";
-    }
-
-    /**
-     * Генерирует пароль без заглавной буквы
-     */
-    public static String generatePasswordNoUppercase() {
-        return "aa123456!";
-    }
-
-    /**
-     * Генерирует пароль без строчной буквы
-     */
-    public static String generatePasswordNoLowercase() {
-        return "AA123456!";
-    }
-
-    /**
-     * Генерирует пароль без цифры
-     */
-    public static String generatePasswordNoDigit() {
-        return "Aa!@#$%^";
-    }
-
-    /**
-     * Генерирует пароль без спецсимвола
-     */
-    public static String generatePasswordNoSpecial() {
-        return "Aa123456";
+    public static String nonValidToken(){
+        return "nonValidTokennonValidTokennonValidToken.nonValidTokennonValidTokennonValidTokennonValidTokennonValidToken.nonValidTokennonValidTokennonValidToken";
     }
 }

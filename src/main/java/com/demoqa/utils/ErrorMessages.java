@@ -18,6 +18,8 @@ public class ErrorMessages {
     public static final String MSG_USER_EXISTS = "User exists";
     public static final String MSG_USER_NOT_FOUND = "User not found!";
     public static final String MSG_USER_ID_NOT_CORRECT = "User Id not correct!";
+    public static final String MSG_PASSWORD_COMPLEXITY = "Passwords must have at least one non alphanumeric character, one digit ('0'-'9'), one uppercase ('A'-'Z'), one lowercase ('a'-'z'), one special character and Password must be eight characters or longer.";
+    public static final String MSG_USER_NOT_AUTH =  "User not authorized!";
 
     // 🔹 Валидный пароль-шаблон
     public static final String VALID_PASSWORD = "Aa123456!";

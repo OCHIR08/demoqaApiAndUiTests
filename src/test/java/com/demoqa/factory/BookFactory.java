@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Factory для создания тестовых данных BookStore API
@@ -20,11 +19,6 @@ public class BookFactory {
             "9781491950296",  // You Don't Know JS: Scope & Closures
             "9781449366179"   // Learning React
     );
-
-    private static final Random RANDOM = new Random();
-
-    // 🔹 Приватный конструктор — класс только со статическими методами
-    private BookFactory() {}
 
     /**
      * Получить N уникальных валидных ISBN (случайный порядок)
@@ -54,20 +48,10 @@ public class BookFactory {
                 ));
     }
 
-    /**
-     * Получить N валидных ISBN (с возможными дубликатами)
-     * @param count количество ISBN
-     * @return список ISBN (может содержать дубликаты)
-     */
-    public static List<String> getValidIsbnsWithDuplicates(int count) {
-        if (count < 0) {
-            throw new IllegalArgumentException("Count cannot be negative: " + count);
-        }
+    private static final Random RANDOM = new Random();
 
-        return IntStream.range(0, count)
-                .mapToObj(i -> getRandomValidIsbn())
-                .collect(Collectors.toList());
-    }
+    // 🔹 Приватный конструктор — класс только со статическими методами
+    private BookFactory() {}
 
     /**
      * Получить случайный валидный ISBN
@@ -81,6 +65,13 @@ public class BookFactory {
      */
     public static String getFirstValidIsbn() {
         return VALID_ISBNS.get(0);
+    }
+
+    /**
+     * Получить второй валидный ISBN (детерминировано, для стабильных тестов)
+     */
+    public static String getSecondValidIsbn() {
+        return VALID_ISBNS.get(1);
     }
 
     /**
@@ -102,12 +93,5 @@ public class BookFactory {
      */
     public static String getEmptyIsbn() {
         return "";
-    }
-
-    /**
-     * Проверить, является ли ISBN валидным (есть в DemoQA)
-     */
-    public static boolean isValidIsbn(String isbn) {
-        return VALID_ISBNS.contains(isbn);
     }
 }

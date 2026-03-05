@@ -20,7 +20,7 @@ import static com.demoqa.utils.ErrorMessages.*;
 public class LoginTest extends BaseApiTest {
     private final AccountServices accountServices = new AccountServices();
 
-//    ✅ Успешный вход
+    //✅ Positive-проверки
     @Test
     @Tag("api")
     @Owner("Ermoshkaev")
@@ -36,7 +36,6 @@ public class LoginTest extends BaseApiTest {
         accountServices.verifyLoginResponse(response, credentials.getUserName());
     }
 
-//    ✅ Возвращаются все поля
     @Test
     @Tag("api")
     @Owner("Ermoshkaev")
@@ -45,89 +44,75 @@ public class LoginTest extends BaseApiTest {
     void testLoginSchema() {
         // Arrange
         AccountModel credentials = loginIvan();
+        //Act
+        Response response = accountServices.tryLoginRaw(credentials);
         // Assert
-        accountServices.validateLoginSchema(credentials);
+        accountServices.validateApiResponse(
+                response,
+                200,
+                "login-schema.json",
+                "Проверка схемы авторизации"
+        );
     }
 
 
-//     ❌ Несуществующий пользователь
+    //❌ Negative-проверки
     @Test
     @Tag("api")
     @Owner("Ermoshkaev")
     @Severity(SeverityLevel.BLOCKER)
-    @DisplayName("Аутентификация не существующего пользователя")
-    void unSuccessLoginTest(){
+    @DisplayName("Login: несуществующий пользователь → 404 + code 1207")
+    void login_nonExistentUser_error404(){
         // Arrange
         AccountModel credentials = userNotHave();
         // Act
-        Response response = accountServices.tryLoginRaw(credentials);
+        Response response = accountServices.tryAuthRaw(credentials);
         // Assert
         accountServices.verifyLoginError(response,"1207");
     }
 
-// 🔹 ==================== НЕГАТИВНЫЕ ТЕСТЫ: ПАРОЛЬ ====================
-
-//    ❌ Неверный пароль
     @Test
     @Tag("api")
     @Owner("Ermoshkaev")
     @Severity(SeverityLevel.BLOCKER)
-    @DisplayName("Авторизация с неверным паролем → 404")
-    void loginWithWrongPassword() {
+    @DisplayName("Login: неверный пароль → 404 + code 1207")
+    void login_wrongPassword_error404() {
         // Arrange
         AccountModel credentials = UserWithPassword("WrongPasswowererd123!");
         // Act
-        Response response = accountServices.tryLoginRaw(credentials);
+        Response response = accountServices.tryAuthRaw(credentials);
         // Assert
-        accountServices.verifyErrorMessage(
-                response,
-                CODE_1207,
-                MSG_USER_NOT_FOUND,
-                404
-        );
+        accountServices.verifyErrorMessage(response, CODE_1207, MSG_USER_NOT_FOUND, 404);
     }
 
-// ❌ null username
     @Test
     @Tag("api")
     @Owner("Ermoshkaev")
     @Severity(SeverityLevel.BLOCKER)
-    @DisplayName("Авторизация с null username → 400")
-    void loginWithNullUsername() {
+    @DisplayName("Login: null username → 400 + code 1200")
+    void login_nullUsername_error400() {
         // Arrange
         AccountModel credentials = UserWithUsername(null);
         // Act
-        Response response = accountServices.tryLoginRaw(credentials);
+        Response response = accountServices.tryAuthRaw(credentials);
         // Assert
-        accountServices.verifyErrorMessage(
-                response,
-                CODE_1200,
-                MSG_CREDENTIALS_REQUIRED,
-                400
-        );
+        accountServices.verifyErrorMessage(response, CODE_1200, MSG_CREDENTIALS_REQUIRED, 400);
     }
 
-//    ❌ Пустой username
     @Test
     @Tag("api")
     @Owner("Ermoshkaev")
     @Severity(SeverityLevel.BLOCKER)
-    @DisplayName("Авторизация с пустым username")
-    void loginWithEmptyUsername(){
+    @DisplayName("Login: пустой password → 400 + code 1200")
+    void login_emptyPassword_error400(){
         // Arrange
         AccountModel credentials = UserWithUsername("");
         // Act
-        Response response = accountServices.tryLoginRaw(credentials);
+        Response response = accountServices.tryAuthRaw(credentials);
         // Assert
-        accountServices.verifyErrorMessage(
-                response,
-                CODE_1200,
-                MSG_CREDENTIALS_REQUIRED,
-                400
-        );
+        accountServices.verifyErrorMessage(response, CODE_1200, MSG_CREDENTIALS_REQUIRED, 400);
     }
 
-//     ❌ Пустой пароль
     @Test
     @Tag("api")
     @Owner("Ermoshkaev")
@@ -137,7 +122,7 @@ public class LoginTest extends BaseApiTest {
         // Arrange
         AccountModel credentials = UserWithPassword("");
         // Act
-        Response response = accountServices.tryLoginRaw(credentials);
+        Response response = accountServices.tryAuthRaw(credentials);
         // Assert
         accountServices.verifyErrorMessage(
                 response,
