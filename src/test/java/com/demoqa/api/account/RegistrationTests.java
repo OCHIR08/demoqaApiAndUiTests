@@ -3,10 +3,7 @@ package com.demoqa.api.account;
 import com.demoqa.api.models.request.AccountModel;
 import com.demoqa.api.models.response.registration.RegistrationResponse;
 import com.demoqa.api.services.AccountServices;
-import io.qameta.allure.Description;
-import io.qameta.allure.Owner;
-import io.qameta.allure.Severity;
-import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.*;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
@@ -29,6 +26,8 @@ public class RegistrationTests {
     @Tag("positive")
     @Owner("Ermoshkaev")
     @Severity(SeverityLevel.BLOCKER)
+    @TmsLink("REG-001")  // Ссылка на тест-кейс в TMS
+    @Link(name = "API Documentation", url = "https://demoqa.com/swagger")
     @DisplayName("Регистрация нового пользователя с валидными данными")
     @Description("Проверка: userID, username, пустой список книг, статус 201")
     void registrationWithValidData() {

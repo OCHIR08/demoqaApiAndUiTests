@@ -46,6 +46,26 @@ public class AccountServices {
                 .as(RegistrationResponse.class);
     }
 
+//    @Step("Регистрация пользователя: {credentials.userName}")
+//    public RegistrationResponse registrationNew(AccountModel credentials) {
+//        Response response = client.registration(credentials);
+//
+//        // Attach request
+//        Allure.attachment("Registration Request",
+//                "{\"userName\": \"" + credentials.getUserName() + "\"}"
+//        );
+//
+//        // Attach response
+//        Allure.attachment("Registration Response",
+//                response.getBody().asString()
+//        );
+//
+//        return response.then()
+//                .statusCode(201)
+//                .extract()
+//                .as(RegistrationResponse.class);
+//    }
+
     @Step("Получить данные клиента")
     public Response info(String userId, String token){
         return client.getInfoAccount(userId,token);

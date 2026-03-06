@@ -1,6 +1,7 @@
 plugins {
     id 'java'
-    id 'io.qameta.allure' version '2.11.2'
+    id 'io.qameta.allure' version '2.12.0'  // ✅ Обновлённая версия
+    id 'jacoco'
 }
 
 java {
@@ -28,13 +29,14 @@ dependencies {
     implementation 'io.rest-assured:rest-assured:5.4.0'
     implementation 'io.rest-assured:json-schema-validator:5.4.0'
 
-
-
     // Allure
     implementation 'io.qameta.allure:allure-selenide:2.27.0'
     implementation 'io.qameta.allure:allure-junit5:2.27.0'
     implementation 'io.qameta.allure:allure-java-commons:2.27.0'
     implementation 'io.qameta.allure:allure-rest-assured:2.27.0'
+
+    // 🔥 AspectJ Weaver — вручную как зависимость (для @Step аннотаций)
+    testImplementation 'org.aspectj:aspectjweaver:1.9.20'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.26'
@@ -43,17 +45,11 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
 
     implementation 'com.google.code.gson:gson:2.10.1'
-
     implementation 'com.github.javafaker:javafaker:1.0.2'
-
     implementation 'org.aeonbits.owner:owner:1.0.12'
 }
 
-test {
-    useJUnitPlatform()
-    systemProperty "allure.results.directory", "$buildDir/allure-results"
-}
-
+// Allure конфигурация
 allure {
     version = '2.27.0'
     adapter {
@@ -63,5 +59,49 @@ allure {
                 enabled = true
             }
         }
+        // ❌ Не добавляем aspectjweaver блок — он добавлен как зависимость выше
     }
+    report {
+        version = '2.27.0'
+    }
+}
+
+// JaCoCo
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+        csv.required = false
+    }
+}
+
+// Тесты
+test {
+    useJUnitPlatform {
+        includeTags 'api'
+        excludeTags 'skip'
+    }
+
+    systemProperties = [
+            'allure.results.directory': "$buildDir/allure-results"
+    ]
+
+    // 🔥 JVM аргумент для AspectJ agent (включает @Step аннотации)
+    jvmArgs = [
+            "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('aspectjweaver') }.absolutePath}"
+    ]
+
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        exceptionFormat = 'full'
+    }
+
+    finalizedBy jacocoTestReport
+    finalizedBy allureReport  // ✅ Встроенная задача плагина
 }
