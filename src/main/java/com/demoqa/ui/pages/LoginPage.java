@@ -1,6 +1,7 @@
 package com.demoqa.ui.pages;
 
 import com.codeborne.selenide.SelenideElement;
+import com.demoqa.api.models.request.AccountModel;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.$;
@@ -17,9 +18,9 @@ public class LoginPage {
         open("/login");
     }
 
-    public void login(String login, String password) {
-        $(fieldLogin).setValue(login);
-        $(fieldPassword).setValue(password);
+    public void login(AccountModel user) {
+        $(fieldLogin).setValue(user.getUserName());
+        $(fieldPassword).setValue(user.getPassword());
         $(loginBtn).click();
     }
 

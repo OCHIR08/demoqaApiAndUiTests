@@ -1,5 +1,6 @@
 package com.demoqa.ui.steps;
 
+import com.demoqa.api.models.request.AccountModel;
 import com.demoqa.ui.pages.LoginPage;
 import io.qameta.allure.Step;
 
@@ -12,8 +13,8 @@ public class LoginStepsUi {
     }
 
     @Step("Авторизация")
-    public void login(String login, String password) {
-        loginPage.login(login,password);
+    public void login(AccountModel user) {
+        loginPage.login(user);
     }
 
     @Step("Убедитесь, что пользователь вошел в систему")

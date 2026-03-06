@@ -85,12 +85,7 @@ public class RegistrationTests {
         //Act
         Response response = accountServices.tryRegistrationRaw(user);
         // Assert
-        accountServices.validateApiResponse(
-                 response,
-                201,
-                "registration-schema.json",
-                "Проверка схемы регистрации"
-                );
+        accountServices.validateApiResponse(response, 201, "registration-schema.json", "Проверка схемы регистрации");
     }
 
     //❌ Negative-проверки
@@ -105,11 +100,7 @@ public class RegistrationTests {
         //Act
         Response response = accountServices.tryRegistrationRaw(user);
         // Assert
-        accountServices.verifyErrorMessage(
-                response,
-                CODE_1300,
-                MSG_PASSWORD_TOO_SHORT,
-                400);
+        accountServices.verifyErrorMessage(response, CODE_1300, MSG_PASSWORD_TOO_SHORT, 400);
     }
 
     @Test
@@ -152,11 +143,7 @@ public class RegistrationTests {
         accountServices.registrationNew(user); // первая регистрация
         Response response = accountServices.tryRegistrationRaw(user); // повтор
         // Assert
-        accountServices.verifyErrorMessage(
-                response,
-                CODE_1204,
-                MSG_USER_EXISTS,
-                406);
+        accountServices.verifyErrorMessage(response, CODE_1204, MSG_USER_EXISTS, 406);
     }
 
 
@@ -203,11 +190,7 @@ public class RegistrationTests {
         //Act
         Response response = accountServices.tryRegistrationRaw(user);
         // Assert
-        accountServices.verifyErrorMessage(
-                response,
-                CODE_1200,
-                MSG_CREDENTIALS_REQUIRED,
-                400);
+        accountServices.verifyErrorMessage(response, CODE_1200, MSG_CREDENTIALS_REQUIRED, 400);
     }
 
     @Test
@@ -237,11 +220,6 @@ public class RegistrationTests {
         // Act
         Response response =accountServices.tryRegistrationRaw(user);
         // Assert
-        accountServices.verifyErrorMessage(
-                response,
-                CODE_1300,
-                MSG_PASSWORD_TOO_SHORT,
-                400
-        );
+        accountServices.verifyErrorMessage(response, CODE_1300, MSG_PASSWORD_TOO_SHORT, 400);
     }
 }

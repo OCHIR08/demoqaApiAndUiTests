@@ -99,6 +99,7 @@ public class BookServices {
     public GetBooksResponse getUserBooksCollection(String userId, String token) {
         return client.getUserBooks(userId, token)
                 .then()
+                .log().all()
                 .statusCode(200)
                 .contentType("application/json")  // 🔥 Проверяем, что пришёл JSON
                 .extract()

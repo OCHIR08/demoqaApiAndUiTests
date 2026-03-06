@@ -39,28 +39,26 @@ public class DeleteBookStoreTests {
         AccountModel user = createValidUser();
         RegistrationResponse reg = accountServices.registrationNew(user);
         GetTokenResponse tokenResp = accountServices.getToken(user);
-
         String isbnToDelete = getFirstValidIsbn();
         String token = tokenResp.getToken();
         String userId = reg.getUserId();
-
+        // Act
+        bookServices.deleteAllUserBooks(userId,token);
         AddBooksModel addBody = AddBooksModel.ofSingle(userId, isbnToDelete);
         bookServices.addBooksToUser(userId, token, addBody);
 
-        // Act
         DeleteBookModel deleteBody = DeleteBookModel.builder()
                 .userId(userId)
                 .isbn(isbnToDelete)
                 .build();
 
-        Response response = bookServices.deleteBookFromUser(deleteBody, token);
-
-        // Assert
-//        response.then().statusCode(204);
-        // Проверить, что книга удалена
+        bookServices.deleteBookFromUser(deleteBody, token);
         GetBooksResponse books = bookServices.getUserBooksCollection(userId, token);
+        //Assert
         Assertions.assertFalse(books.getBooks().stream()
                 .anyMatch(b -> b.getIsbn().equals(isbnToDelete)));
+        bookServices.getUserBooksCollection(userId, token);
+
     }
 
     //    ❌ Negative
